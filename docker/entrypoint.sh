@@ -28,4 +28,8 @@ fi
 chown -R grok2api:grok2api /app/config.yaml /app/data 2>/dev/null || true
 chmod 0600 /app/config.yaml
 
+if [ -n "${DATABASE_URL:-}" ] && [ -z "${GROK2API_DATABASE_URL:-}" ]; then
+  export GROK2API_DATABASE_URL="${DATABASE_URL}"
+fi
+
 exec su-exec grok2api:grok2api "$@"
