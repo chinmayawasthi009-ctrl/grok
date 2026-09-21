@@ -1,6 +1,9 @@
 **
 
 !VERSION
+!config.yaml
+!data/
+!data/**
 
 !backend/
 !backend/go.mod
