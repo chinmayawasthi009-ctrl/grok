@@ -51,3 +51,6 @@ __pycache__/
 /tmp/
 /Dockerfile.local
 node_modules/
+migrate_data.py
+import_build_52.py
+backend/cmd/check_build/
