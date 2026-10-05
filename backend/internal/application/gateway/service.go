@@ -2092,7 +2092,7 @@ func shouldStopForNonAccountFingerprint(fingerprints map[string]int, failure *Up
 }
 
 func isRetryable(status int) bool {
-	return status == 402 || status == 403 || status == 429 || status >= 500
+	return status == 402 || status == 403 || status == 424 || status == 429 || status >= 500
 }
 
 func isReasoningRecoveryFailedResponse(response *provider.Response, upstreamProvider accountdomain.Provider) bool {
