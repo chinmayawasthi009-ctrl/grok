@@ -14,7 +14,7 @@ func TestConfigureHTTP2HealthEnablesActivePing(t *testing.T) {
 	if h2.ReadIdleTimeout != HTTP2ReadIdleTimeout || h2.PingTimeout != HTTP2PingTimeout {
 		t.Fatalf("HTTP/2 health = (%s, %s)", h2.ReadIdleTimeout, h2.PingTimeout)
 	}
-	if transport.TLSNextProto["h2"] == nil {
+	if !HasHTTP2(transport) {
 		t.Fatal("HTTP/2 transport was not installed")
 	}
 }

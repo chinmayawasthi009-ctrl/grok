@@ -41,7 +41,7 @@ func TestBuildDirectTransportEnablesHTTP2Health(t *testing.T) {
 	if transport.IdleConnTimeout != buildtransport.IdleConnTimeout {
 		t.Fatalf("idle connection timeout = %s", transport.IdleConnTimeout)
 	}
-	if transport.TLSNextProto["h2"] == nil {
+	if !buildtransport.HasHTTP2(transport) {
 		t.Fatal("Build direct transport did not install HTTP/2 health checks")
 	}
 }

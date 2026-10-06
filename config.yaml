@@ -52,7 +52,7 @@ database:
   postgres:
     # [必须修改：仅 driver=postgres] 填写真实 DSN，并按需启用 sslmode。
     # 也可通过 GROK2API_DATABASE_URL 注入；非空环境变量会覆盖本字段并自动启用 postgres。
-    dsn: "postgresql://neondb_owner:npg_UZDJ1Ts3WamY@ep-round-band-zawn53iw-pooler.c-2.eu-west-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require"
+    dsn: "postgresql://neondb_owner:npg_J9ZPKOTi3xHp@ep-calm-art-b121900i-pooler.c-5.eu-central-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require"
     # [按需修改] 根据数据库连接容量调整。
     maxOpenConns: 50
     maxIdleConns: 10
@@ -95,6 +95,10 @@ routing:
   reasoningReplayMaxEntries: 10240
   # [按需修改] 按账号隔离上游连接池，适合外部 L4/连接哈希负载均衡；会增加连接数、TLS 握手和文件描述符占用。
   accountIsolatedConnections: false
+  # [按需修改] 账号冷却时间。cooldownBase 是首次 429/失败后的最低隔离时间，
+  # 后续失败按指数翻倍至 cooldownMax。默认 30s/30m 在大号池下太短。
+  cooldownBase: 2m
+  cooldownMax: 2h
   # [通常不要修改] 大账号池默认使用有界分段选号；保留完整池回退、额度优先级和原子并发门禁。
   segmentedSelectorEnabled: true
   segmentedSelectorMinCandidates: 3000

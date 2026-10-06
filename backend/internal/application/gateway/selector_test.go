@@ -1985,8 +1985,8 @@ func TestConsoleRateLimitReconciliationUsesNonAccumulatingCooldown(t *testing.T)
 			}
 			cooldown := updated.CooldownUntil.Sub(before)
 			if test.status == http.StatusTooManyRequests {
-				if cooldown < 11*time.Second || cooldown > 13*time.Second {
-					t.Fatalf("cooldown = %s, want ~12s", cooldown)
+				if cooldown < 59*time.Second || cooldown > 61*time.Second {
+					t.Fatalf("cooldown = %s, want ~60s", cooldown)
 				}
 			} else if cooldown < 2*time.Minute {
 				t.Fatalf("hard failure cooldown = %s, want at least 2m", cooldown)
