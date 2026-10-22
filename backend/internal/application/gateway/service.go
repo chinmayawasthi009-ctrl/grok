@@ -98,6 +98,11 @@ const nonAccountFailureFingerprintLimit = 16
 // upstream from multiplying a long idle deadline across the whole pool.
 const streamIdleFailureFingerprintLimit = 2
 
+// consoleRateLimitMinCooldown is the minimum isolation duration for Console 429
+// responses whose Retry-After is missing or very short. Without a floor, the
+// soft cooldown lets the account re-enter the pool almost immediately.
+const consoleRateLimitMinCooldown = time.Minute
+
 var freeQuotaUsagePattern = regexp.MustCompile(`(?i)tokens\s*\(actual/limit\)\s*:\s*([0-9]+)\s*/\s*([0-9]+)`)
 
 type Input struct {
@@ -398,10 +403,25 @@ func (s *Service) pruneTeamModelRateLimitsLocked(now time.Time) {
 }
 
 func (s *Service) refreshTeamModelRateLimitStateLocked() {
-	if len(s.rateLimits) == 0 {
-		clear(s.rateLimitTeams)
+	if len(s.rateLimits) == 0 && len(s.rateLimitTeams) == 0 {
 		s.rateLimitNextExpiry.Store(0)
 		s.rateLimitActive.Store(false)
+		return
+	}
+	if len(s.rateLimits) == 0 {
+		// All team-model blocks have expired, but team observations still
+		// exist. Keep rateLimitTeams alive so the next 429 can use the
+		// observed upstream team fingerprint instead of the potentially-empty
+		// credential.TeamID. Track the next observation expiry so the prune
+		// pass fires on time.
+		var nextExpiry time.Time
+		for _, observation := range s.rateLimitTeams {
+			if nextExpiry.IsZero() || observation.ExpiresAt.Before(nextExpiry) {
+				nextExpiry = observation.ExpiresAt
+			}
+		}
+		s.rateLimitNextExpiry.Store(nextExpiry.UnixNano())
+		s.rateLimitActive.Store(true)
 		return
 	}
 	var nextExpiry time.Time
@@ -1472,7 +1492,7 @@ attemptLoop:
 				}
 			}
 			buildForbiddenReauth := credential.Provider == accountdomain.ProviderBuild && s.shouldInvalidateBuildForbidden(lastFailure)
-			if response.StatusCode == http.StatusTooManyRequests && response.RateLimit != nil && response.RateLimit.Model == route.UpstreamModel {
+			if response.StatusCode == http.StatusTooManyRequests && response.RateLimit != nil && normalizeRateLimitModelName(response.RateLimit.Model) == normalizeRateLimitModelName(route.UpstreamModel) {
 				rateLimitMeta := *response.RateLimit
 				if strings.TrimSpace(rateLimitMeta.TeamID) == "" {
 					rateLimitMeta.TeamID = strings.TrimSpace(credential.TeamID)
@@ -2142,7 +2162,7 @@ func shouldStopForNonAccountFingerprint(fingerprints map[string]int, failure *Up
 }
 
 func isRetryable(status int) bool {
-	return status == 402 || status == 403 || status == 429 || status >= 500
+	return status == 402 || status == 403 || status == 424 || status == 429 || status >= 500
 }
 
 // isBuildTransientRetryStatus mirrors the Grok Build client's turn-level
@@ -2228,7 +2248,13 @@ func (s *Service) applyRateLimitReconciliation(ctx context.Context, credential a
 		// A Console 429 with available quota, an in-progress cross-instance probe,
 		// or an inconclusive /usage request is transient. Isolate the account for
 		// this Retry-After window without growing its durable failure count.
-		if err := s.selector.markSoftFailure(ctx, credential, status, retryAfter); err != nil {
+		// Enforce a minimum floor so a missing or very short Retry-After cannot
+		// let the account re-enter the pool almost immediately.
+		effectiveRetryAfter := retryAfter
+		if effectiveRetryAfter < consoleRateLimitMinCooldown {
+			effectiveRetryAfter = consoleRateLimitMinCooldown
+		}
+		if err := s.selector.markSoftFailure(ctx, credential, status, effectiveRetryAfter); err != nil {
 			s.logger.Warn("console_rate_limit_soft_cooldown_failed", "account_id", credential.ID, "state", state, "error", err)
 		}
 		return
@@ -2254,4 +2280,12 @@ func firstError(values ...error) error {
 		}
 	}
 	return errors.New("未知上游错误")
+}
+
+// normalizeRateLimitModelName lowercases and collapses punctuation variants so
+// the team-model shield can match upstream model strings that differ only in
+// trivial formatting (e.g. "grok-4-5-build" vs "grok-4.5-build").
+func normalizeRateLimitModelName(name string) string {
+	name = strings.ToLower(strings.TrimSpace(name))
+	return strings.NewReplacer(".", "-", "_", "-").Replace(name)
 }

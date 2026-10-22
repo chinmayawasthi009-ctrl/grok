@@ -11,7 +11,7 @@ Thumbs.db
 .env
 .env.*
 !.env.example
-/config.yaml
+# /config.yaml
 /config.local.yaml
 /config.*.local.yaml
 /docs/*
@@ -22,7 +22,7 @@ Thumbs.db
 *.pcapng
 
 # Runtime data
-/data/
+# /data/
 /backend/data/
 *.log
 
@@ -41,7 +41,7 @@ __pycache__/
 # Frontend
 /.pnpm-store/
 /frontend/node_modules/
-/frontend/dist/
+# /frontend/dist/
 /frontend/.cache/
 /frontend/*.tsbuildinfo
 
@@ -50,3 +50,7 @@ __pycache__/
 /.tmp/
 /tmp/
 /Dockerfile.local
+node_modules/
+migrate_data.py
+import_build_52.py
+backend/cmd/check_build/

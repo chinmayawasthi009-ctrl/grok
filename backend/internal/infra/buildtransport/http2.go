@@ -33,3 +33,15 @@ func ConfigureHTTP2Health(transport *http.Transport) (*http2.Transport, error) {
 	h2.PingTimeout = HTTP2PingTimeout
 	return h2, nil
 }
+
+// HasHTTP2 reports whether the transport has HTTP/2 enabled either via
+// http.Protocols or the legacy TLSNextProto table.
+func HasHTTP2(transport *http.Transport) bool {
+	if transport == nil {
+		return false
+	}
+	if transport.Protocols != nil && transport.Protocols.HTTP2() {
+		return true
+	}
+	return transport.TLSNextProto != nil && transport.TLSNextProto["h2"] != nil
+}

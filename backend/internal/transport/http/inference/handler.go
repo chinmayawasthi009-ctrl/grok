@@ -1410,6 +1410,8 @@ func copyStreamWithFallbackModel(writer gin.ResponseWriter, source io.Reader, pr
 	buffer := make([]byte, responseCopyBufferBytes)
 	received := 0
 	transferred := 0
+	writer.WriteHeaderNow()
+	writer.Flush()
 	for {
 		n, readErr := source.Read(buffer)
 		if n > 0 {
