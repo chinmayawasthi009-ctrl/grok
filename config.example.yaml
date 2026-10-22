@@ -32,7 +32,7 @@ secrets:
 
 bootstrapAdmin:
   # [按需修改] 仅在数据库中没有管理员时使用。
-  username: "admin"
+  username: "Chinmay"
   password: "7876753858"
 
 frontend:

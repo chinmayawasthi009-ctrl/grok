@@ -916,7 +916,7 @@ func defaultConfig() Config {
 			RefreshTokenTTL: Duration(30 * 24 * time.Hour),
 		},
 		BootstrapAdmin: BootstrapAdminConfig{
-			Username: "admin",
+			Username: "Chinmay",
 			Password: "7876753858",
 		},
 		Provider: ProviderConfig{

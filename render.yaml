@@ -10,7 +10,7 @@ services:
       - key: PORT
         value: 8000
       - key: GROK2API_ADMIN_USERNAME
-        value: admin
+        value: Chinmay
       - key: GROK2API_ADMIN_PASSWORD
         value: "7876753858"
       - key: GROK2API_JWT_SECRET
