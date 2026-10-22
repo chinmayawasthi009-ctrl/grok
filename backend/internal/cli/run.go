@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"github.com/chenyme/grok2api/backend/internal/app"
@@ -24,7 +25,12 @@ func Run(args []string) error {
 	if err != nil {
 		return err
 	}
-	if options.listen != "" {
+	if port := strings.TrimSpace(os.Getenv("PORT")); port != "" {
+		cfg.Server.Listen = "0.0.0.0:" + port
+		if err := cfg.Validate(); err != nil {
+			return err
+		}
+	} else if options.listen != "" {
 		cfg.Server.Listen = options.listen
 		if err := cfg.Validate(); err != nil {
 			return err

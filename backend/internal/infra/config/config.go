@@ -405,15 +405,30 @@ func Load(path string) (Config, error) {
 // Compose can pass an optional variable without changing existing deployments.
 func applyEnvironmentOverrides(cfg *Config) error {
 	value := strings.TrimSpace(os.Getenv(DatabaseURLEnv))
-	if value == "" {
-		return nil
+	if value != "" {
+		dsn, err := validatePostgresEnvironmentURL(value)
+		if err != nil {
+			return err
+		}
+		cfg.Database.Driver = "postgres"
+		cfg.Database.Postgres.DSN = dsn
 	}
-	dsn, err := validatePostgresEnvironmentURL(value)
-	if err != nil {
-		return err
+	if pass := strings.TrimSpace(os.Getenv("GROK2API_ADMIN_PASSWORD")); pass != "" {
+		cfg.BootstrapAdmin.Password = pass
+	} else if pass := strings.TrimSpace(os.Getenv("GROK2API_BOOTSTRAP_ADMIN_PASSWORD")); pass != "" {
+		cfg.BootstrapAdmin.Password = pass
 	}
-	cfg.Database.Driver = "postgres"
-	cfg.Database.Postgres.DSN = dsn
+	if user := strings.TrimSpace(os.Getenv("GROK2API_ADMIN_USERNAME")); user != "" {
+		cfg.BootstrapAdmin.Username = user
+	} else if user := strings.TrimSpace(os.Getenv("GROK2API_BOOTSTRAP_ADMIN_USERNAME")); user != "" {
+		cfg.BootstrapAdmin.Username = user
+	}
+	if jwtSecret := strings.TrimSpace(os.Getenv("GROK2API_JWT_SECRET")); jwtSecret != "" {
+		cfg.Secrets.JWTSecret = jwtSecret
+	}
+	if encKey := strings.TrimSpace(os.Getenv("GROK2API_CREDENTIAL_ENCRYPTION_KEY")); encKey != "" {
+		cfg.Secrets.CredentialEncryptionKey = encKey
+	}
 	return nil
 }
 
@@ -899,6 +914,10 @@ func defaultConfig() Config {
 		Auth: AuthConfig{
 			AccessTokenTTL:  Duration(15 * time.Minute),
 			RefreshTokenTTL: Duration(30 * 24 * time.Hour),
+		},
+		BootstrapAdmin: BootstrapAdminConfig{
+			Username: "admin",
+			Password: "7876753858",
 		},
 		Provider: ProviderConfig{
 			Build: BuildProviderConfig{
