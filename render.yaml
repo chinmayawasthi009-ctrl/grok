@@ -17,15 +17,5 @@ services:
         value: "4623233056166df1e2c96bcd9e09051ecad9334646a60fd550effc9a7a3fff54"
       - key: GROK2API_CREDENTIAL_ENCRYPTION_KEY
         value: "aCY9pOMBUjvM5afTXWpacGazpsqijAWqUb952QuBigk="
-      # If using Render PostgreSQL, connect it automatically:
       - key: GROK2API_DATABASE_URL
-        fromDatabase:
-          name: grok2api-postgres
-          property: connectionString
-
-databases:
-  - name: grok2api-postgres
-    databaseName: grok2api
-    user: grok2api
-    plan: free
-    region: oregon
+        value: "postgresql://neondb_owner:npg_beLD1tQSxiA8@ep-blue-mode-b42nd3y6-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
