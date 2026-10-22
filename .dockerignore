@@ -1,7 +1,10 @@
 **
 
+!Dockerfile
+!Dockerfile*
 !VERSION
 !config.yaml
+!config.example.yaml
 !data/
 !data/**
 
