@@ -52,7 +52,7 @@ database:
   postgres:
     # [必须修改：仅 driver=postgres] 填写真实 DSN，并按需启用 sslmode。
     # 也可通过 GROK2API_DATABASE_URL 注入；非空环境变量会覆盖本字段并自动启用 postgres。
-    dsn: "postgresql://neondb_owner:npg_8f5EzWlwBQpd@ep-tiny-fire-za3m21gg-pooler.c-2.eu-west-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require"
+    dsn: "postgresql://neondb_owner:npg_b4kuSZ5AYOmC@ep-silent-boat-b4vbh31x-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
     # [按需修改] 根据数据库连接容量调整。
     maxOpenConns: 50
     maxIdleConns: 10
