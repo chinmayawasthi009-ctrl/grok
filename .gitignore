@@ -53,4 +53,6 @@ __pycache__/
 node_modules/
 migrate_data.py
 import_build_52.py
+import_new1_accounts.py
+new1/
 backend/cmd/check_build/
